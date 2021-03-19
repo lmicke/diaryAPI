@@ -121,13 +121,27 @@ func MakeCreateEntry(db *sql.DB) http.HandlerFunc {
 		}
 
 		entry.CreateEntry(db)
+		w.WriteHeader(http.StatusCreated)
+		js, err := json.Marshal(entry)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
 
 	}
 }
 
 //DeleteEntry deletes an entry by it's ID
-func MakeDeleteEntry(w http.ResponseWriter, r *http.Request) {
-
+func MakeDeleteEntry(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, _ := strconv.Atoi(vars["id"])
+		entry := model.Entry{ID: id}
+		entry.DeleteEntry(db)
+	}
 }
 
 //GetAllEntries retrieves all Entries from the Database

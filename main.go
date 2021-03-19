@@ -36,6 +36,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/entry/{id}", handlers.MakeGetEntry(db)).Methods("GET")
 	r.Handle("/entry", handlers.MakeCreateEntry(db)).Methods("POST")
+	r.Handle("/entry/{id}", handlers.MakeDeleteEntry(db)).Methods("DELETE")
 	//http.Handle("/", r)
 
 	srv := &http.Server{

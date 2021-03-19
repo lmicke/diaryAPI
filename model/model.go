@@ -30,7 +30,7 @@ func (e *Entry) GetEntry(id int, db *sql.DB) {
 
 func (e *Entry) CreateEntry(db *sql.DB) {
 	db.QueryRow("INSERT INTO entries (title,text) VALUES(?, ?);", e.Title, e.Text)
-	row := db.QueryRow("SELECT id, title, text, created_at FROM entries WHERE title=? AND text=?", e.Title, e.Text)
+	row := db.QueryRow("SELECT id, title, text, created_at FROM entries WHERE title=? AND text=?;", e.Title, e.Text)
 	err := row.Scan(&e.ID, &e.Title, &e.Text, &e.Date)
 
 	switch {
@@ -41,6 +41,21 @@ func (e *Entry) CreateEntry(db *sql.DB) {
 	default:
 		log.Printf("id is %v, Title is %s, Text is %s\n", e.ID, e.Title, e.Text)
 
+	}
+}
+
+func (e *Entry) DeleteEntry(db *sql.DB) {
+	db.QueryRow("DELETE FROM entries WHERE id=?;", e.ID)
+	row := db.QueryRow("SELECT id, title, text, created_at FROM entries WHERE id=?;", e.ID)
+	err := row.Scan(&e.ID, &e.Title, &e.Text, &e.Date)
+
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("no user with id %d\n", e.ID)
+	case err != nil:
+		log.Fatalf("query error: %v\n", err)
+	default:
+		log.Printf("id is %v, Title is %s, Text is %s\n", e.ID, e.Title, e.Text)
 	}
 }
 
