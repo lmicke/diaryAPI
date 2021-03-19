@@ -14,8 +14,7 @@ type Entry struct {
 }
 
 func (e *Entry) GetEntry(id int, db *sql.DB) {
-	row := db.QueryRow("SELECT id, title, text, created_at FROM entries WHERE id=?", id)
-
+	row := db.QueryRow("SELECT id, title, text, created_at FROM entries WHERE id=?;", id)
 	err := row.Scan(&e.ID, &e.Title, &e.Text, &e.Date)
 	switch {
 	case err == sql.ErrNoRows:
@@ -57,6 +56,41 @@ func (e *Entry) DeleteEntry(db *sql.DB) {
 	default:
 		log.Printf("id is %v, Title is %s, Text is %s\n", e.ID, e.Title, e.Text)
 	}
+}
+
+func (e *Entry) UpdateEntry(db *sql.DB) {
+	if e.Exists(db) {
+		db.QueryRow(`UPDATE entries SET text=? , title=? WHERE id=?;`, e.Text, e.Title, e.ID)
+		row := db.QueryRow("SELECT id, title, text, created_at FROM entries WHERE id=?;", e.ID)
+		err := row.Scan(&e.ID, &e.Title, &e.Text, &e.Date)
+
+		switch {
+		case err == sql.ErrNoRows:
+			log.Printf("no user with id %d\n", e.ID)
+		case err != nil:
+			log.Fatalf("query error: %v\n", err)
+		default:
+			log.Printf("id is %v, Title is %s, Text is %s\n", e.ID, e.Title, e.Text)
+		}
+	} else {
+		e.CreateEntry(db)
+	}
+
+}
+
+func (e *Entry) Exists(db *sql.DB) bool {
+	row := db.QueryRow("SELECT id FROM entries WHERE id=?;", e.ID)
+	err := row.Scan(&e.ID)
+	switch {
+	case err == sql.ErrNoRows:
+		return false
+	case err != nil:
+		log.Fatalf("query error: %v\n", err)
+	default:
+		return true
+
+	}
+	return true
 }
 
 /*

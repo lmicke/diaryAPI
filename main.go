@@ -37,6 +37,7 @@ func main() {
 	r.HandleFunc("/entry/{id}", handlers.MakeGetEntry(db)).Methods("GET")
 	r.Handle("/entry", handlers.MakeCreateEntry(db)).Methods("POST")
 	r.Handle("/entry/{id}", handlers.MakeDeleteEntry(db)).Methods("DELETE")
+	r.Handle("/entry/{id}", handlers.MakeUpdateEntry(db)).Methods("PUT")
 	//http.Handle("/", r)
 
 	srv := &http.Server{
