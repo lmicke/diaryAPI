@@ -20,7 +20,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler: app.router,
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%v", mustGetenv("PORT")),
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
@@ -60,10 +60,8 @@ func newApp() *app {
 		}
 	}
 
-	// Create the votes table if it does not already exist.
-	if _, err = app.db.Exec(`CREATE TABLE IF NOT EXISTS votes
-	( id SERIAL NOT NULL, created_at datetime NOT NULL, updated_at datetime  NOT NULL,
-	candidate VARCHAR(6) NOT NULL, PRIMARY KEY (id) );`); err != nil {
+	// Create the entries table if it does not already exist.
+	if _, err = app.db.Exec(`CREATE TABLE IF NOT EXISTS entries ( id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, text TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP );`); err != nil {
 		log.Fatalf("DB.Exec: unable to create table: %s", err)
 	}
 
